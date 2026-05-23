@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CodeCrafters: Constraints — The only place to prove architectural judgment by building and breaking production-grade systems locally.">
+  <title>CodeCrafters: Constraints — Prove Architectural Judgment</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-color: #090a0c;
+      --bg-surface: #0f1115;
+      --border-color: #1e2128;
+      --border-hover: #2dd4bf33;
+      --text-primary: #e8eaed;
+      --text-muted: #8c939e;
+      --accent-color: #2dd4bf;
+      --accent-dim: rgba(45, 212, 191, 0.1);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      --max-width: 720px;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.75;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Navigation */
+    nav {
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.5rem 0;
+      margin-bottom: 4rem;
+    }
+
+    .nav-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Layout Elements */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    section {
+      margin-bottom: 5.5rem;
+    }
+
+    h1, h2, h3, h4 {
+      color: #ffffff;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    p.muted {
+      color: var(--text-muted);
+    }
+
+    strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border-color);
+      margin: 5rem 0;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      margin-bottom: 6rem;
+      padding-top: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--accent-color);
+      background-color: var(--accent-dim);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .hero-tagline {
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      margin-bottom: 2rem;
+      line-height: 1.4;
+      font-weight: 400;
+    }
+
+    .hero-description {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Philosophy / Left-aligned Prose */
+    .prose p {
+      font-size: 1.0625rem;
+      color: #d1d5db;
+    }
+
+    .insight-box {
+      border-left: 2px solid var(--accent-color);
+      padding-left: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    /* How it Works */
+    .steps-container {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .step-card {
+      flex: 1;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.75rem;
+      position: relative;
+    }
+
+    .step-number {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent-color);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .step-title {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    .step-card p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      line-height: 1.5;
+    }
+
+    /* Example Section & Stages */
+    .example-intro {
+      margin-bottom: 3rem;
+      font-size: 1.0625rem;
+    }
+
+    .stages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .stage-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 2rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .stage-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .stage-num {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    .stage-title {
+      font-size: 1.25rem;
+      color: #ffffff;
+    }
+
+    .stage-card p {
+      font-size: 0.975rem;
+      color: #d1d5db;
+      margin-bottom: 1.5rem;
+    }
+
+    .pass-condition {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      background-color: #090a0c;
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .pass-label {
+      color: var(--accent-color);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .pass-value {
+      color: var(--text-primary);
+    }
+
+    /* Comparison Table */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 2rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9375rem;
+    }
+
+    th, td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    th {
+      font-weight: 500;
+      color: #ffffff;
+      background-color: var(--bg-surface);
+      font-size: 0.875rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td:first-child, th:first-child {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Table constraints column highlight */
+    .col-highlight {
+      background-color: rgba(45, 212, 191, 0.03);
+    }
+    
+    td.col-highlight {
+      color: #ffffff;
+    }
+    
+    th.col-highlight {
+      color: var(--accent-color);
+      background-color: rgba(45, 212, 191, 0.05);
+      border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+    }
+
+    /* Who this is for */
+    .target-audience p {
+      font-size: 1.0625rem;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-left: 1.25rem;
+      color: #d1d5db;
+    }
+
+    .target-audience p::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--accent-color);
+    }
+
+    /* ROI Section */
+    .roi-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+
+    .roi-statement {
+      font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+      font-weight: 500;
+      line-height: 1.4;
+      color: #ffffff;
+      border-left: 1px solid var(--border-color);
+      padding-left: 1.5rem;
+      margin-bottom: 0;
+    }
+
+    .roi-statement strong {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Infrastructure Note */
+    .infra-note {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 2.5rem;
+      margin-top: 6rem;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+      
+      section {
+        margin-bottom: 4rem;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero-tagline {
+        font-size: 1.125rem;
+      }
+
+      .hero-description {
+        font-size: 1rem;
+      }
+
+      .steps-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .stage-card {
+        padding: 1.5rem;
+      }
+
+      .stage-header {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .pass-condition {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+
+      .roi-statement {
+        font-size: 1.15rem;
+        padding-left: 1rem;
+      }
+      
+      th, td {
+        padding: 0.75rem;
+        font-size: 0.8125rem;
+      }
+    }
+
+    /* Shared Navigation */
+    .site-nav {
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .site-nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .site-nav-brand {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+
+    .site-nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s ease;
+      padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <span class="site-nav-brand">CodeCrafters: Constraints</span>
+      <div class="site-nav-links">
+        <a href="pitch.html" class="nav-link active">Pitch</a>
+        <a href="explainer.html" class="nav-link">Explainer</a>
+        <a href="monetise.html" class="nav-link">Monetisation</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- 1. Hero Section -->
+    <header class="hero">
+      <span class="hero-badge">NEW PRODUCT LINE</span>
+      <h1>CodeCrafters: Constraints</h1>
+      <p class="hero-tagline">The only place to prove architectural judgment — not just describe it.</p>
+      <p class="hero-description">A hands-on, test-driven curriculum designed to push local implementations to their absolute limits under simulated production pressure.</p>
+    </header>
+
+    <hr>
+
+    <!-- 2. The Problem -->
+    <section class="prose">
+      <h2>The problem</h2>
+      <p>System design is the highest-leverage skill gap in engineering right now.</p>
+      <p>Every existing resource gives you diagrams and explanations. ByteByteGo, Grokking, Hello Interview — they all teach you to <em>recognise</em> good architecture, not <em>produce</em> it. You read about consistent hashing, nod, and move on.</p>
+      <p>When you're in a real system at 2am, that recognition means nothing.</p>
+    </section>
+
+    <!-- 3. The Insight -->
+    <section class="prose">
+      <h2>The insight</h2>
+      <p>CodeCrafters already proved this with Redis and Git.</p>
+      <p>You don't really understand a system until you've built one. The same principle applies to scaling: you don't understand why Twitter needs a fan-out queue until your naive implementation collapses under a load test.</p>
+      <div class="insight-box">
+        <p><strong>Constraints</strong> applies the CodeCrafters method to the one skill that actually determines whether an engineer gets promoted, passes a staff interview, or earns architectural trust at their company.</p>
+      </div>
+    </section>
+
+    <!-- 4. How it Works -->
+    <section>
+      <h2>How it works</h2>
+      <p class="muted" style="margin-bottom: 2rem;">Everything runs locally. Your machine. Your terminal. Your tools. No cloud sandboxes, no custom web IDEs.</p>
+      
+      <div class="steps-container">
+        <div class="step-card">
+          <span class="step-number">Step 01</span>
+          <h3 class="step-title">Clone</h3>
+          <p>Get a working but limited system running instantly on your workstation via Docker.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">Step 02</span>
+          <h3 class="step-title">Break it</h3>
+          <p>The local test runner hammers your system with load, kills dependencies, and watches it fail.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">Step 03</span>
+          <h3 class="step-title">Fix it</h3>
+          <p>Refactor and write real code that survives production-grade constraints, then push to pass.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- 5. Example Challenge: Scale Twitter -->
+    <section>
+      <h2>Example: Scale Twitter</h2>
+      <p class="example-intro">You inherit a working Twitter-like app. Single Flask app, single Postgres instance, a feed endpoint, a follows table. It runs. It just wasn't built for what's about to happen.</p>
+      
+      <div class="stages-list">
+        <!-- Stage 1 -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <h3 class="stage-title">The feed is killing the database</h3>
+            <span class="stage-num">Stage 1</span>
+          </div>
+          <p>The feed query joins across two tables on every request. At 10k users with 500 follows each, it takes 8 seconds. The test runner hits the feed endpoint with 500 concurrent users.</p>
+          <div class="pass-condition">
+            <span class="pass-label">Pass condition:</span>
+            <span class="pass-value">p99 latency under 200ms</span>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <h3 class="stage-title">The write path can't keep up</h3>
+            <span class="stage-num">Stage 2</span>
+          </div>
+          <p>Every post synchronously fans out to all followers' feeds. An account with 100k followers blocks the entire app for seconds. The test runner posts from a high-follower account and checks that unrelated users' requests aren't stalled.</p>
+          <div class="pass-condition">
+            <span class="pass-label">Pass condition:</span>
+            <span class="pass-value">regular users see no degradation during a celebrity post</span>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <h3 class="stage-title">Single point of failure</h3>
+            <span class="stage-num">Stage 3</span>
+          </div>
+          <p>The test runner kills your Postgres container mid-operation. Read replicas, retry logic, a cache fallback. Fix it however you can so the service remains resilient.</p>
+          <div class="pass-condition">
+            <span class="pass-label">Pass condition:</span>
+            <span class="pass-value">app degrades gracefully (reads may be stale, but must not 500)</span>
+          </div>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <h3 class="stage-title">The media problem</h3>
+            <span class="stage-num">Stage 4</span>
+          </div>
+          <p>Images are stored on the local filesystem. The test runner spins up two app instances. An image uploaded to instance A must be readable from instance B.</p>
+          <div class="pass-condition">
+            <span class="pass-label">Pass condition:</span>
+            <span class="pass-value">cross-instance reads succeed via shared object storage</span>
+          </div>
+        </div>
+
+        <!-- Stage 5 -->
+        <div class="stage-card">
+          <div class="stage-header">
+            <h3 class="stage-title">Rate limited by your own users</h3>
+            <span class="stage-num">Stage 5</span>
+          </div>
+          <p>A bot hammers the API — 500 requests per second from the same IP. Real users are getting 503s. The test runner plays both roles simultaneously to test your ingress limits.</p>
+          <div class="pass-condition">
+            <span class="pass-label">Pass condition:</span>
+            <span class="pass-value">legitimate traffic gets through; bot requests are throttled</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- 6. Comparison Table -->
+    <section>
+      <h2>What makes this different</h2>
+      
+      <div class="table-container">
+        <table>
+          <colgroup>
+            <col>
+            <col>
+            <col>
+            <col class="col-highlight">
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th>System Design Interviews</th>
+              <th>ByteByteGo / Grokking</th>
+              <th class="col-highlight">CodeCrafters: Constraints</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Format</strong></td>
+              <td>Talk through diagrams</td>
+              <td>Read and recognise</td>
+              <td class="col-highlight">Build and prove</td>
+            </tr>
+            <tr>
+              <td><strong>Feedback</strong></td>
+              <td>Subjective</td>
+              <td>None</td>
+              <td class="col-highlight">Instant, objective</td>
+            </tr>
+            <tr>
+              <td><strong>Runs on</strong></td>
+              <td>Whiteboard</td>
+              <td>Your browser</td>
+              <td class="col-highlight">Your machine</td>
+            </tr>
+            <tr>
+              <td><strong>Tests judgment</strong></td>
+              <td>Weakly</td>
+              <td>No</td>
+              <td class="col-highlight">Yes</td>
+            </tr>
+            <tr>
+              <td><strong>ROI</strong></td>
+              <td>Interview prep</td>
+              <td>Knowledge</td>
+              <td class="col-highlight">Promotion-level skill</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 7. Who this is for -->
+    <section class="target-audience">
+      <h2>Who this is for</h2>
+      <p>You're a senior engineer who can build anything — but hasn't been tested on whether your systems actually survive production pressure.</p>
+      <p>You're preparing for a staff interview and know that "I would add a cache here" isn't going to cut it anymore.</p>
+      <p>You're the kind of engineer who'd rather be stuck for three hours building something real than watch a 20-minute explainer video.</p>
+    </section>
+
+    <!-- 8. The ROI -->
+    <section>
+      <h2>The ROI is legible</h2>
+      <div class="roi-list">
+        <p class="roi-statement">This is exactly what <strong>staff-level interviews</strong> test.</p>
+        <p class="roi-statement">This is exactly what gets engineers <strong>promoted from senior to lead</strong>.</p>
+        <p class="roi-statement">This is the only platform where you <strong>prove architectural judgment</strong> instead of describing it.</p>
+      </div>
+    </section>
+
+    <!-- 9. Infrastructure Note -->
+    <section>
+      <h2>Infrastructure</h2>
+      <p class="infra-note">Every challenge runs locally via Docker Compose. The test runner is lightweight — it sends HTTP traffic, injects failures, checks outcomes. No persistent cloud infrastructure per user. No GPU clusters. The heavy lifting is on your machine, which is exactly where it should be.</p>
+    </section>
+
+    <!-- 10. Footer -->
+    <footer>
+      <p>A product concept proposed by Kashish Patel &bull; CodeCrafters Pitch</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

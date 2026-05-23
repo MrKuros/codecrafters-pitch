@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CodeCrafters: Constraints — Internal Product Explainer for Evaluating Challenge Design, Infrastructure, and Content leverage.">
+  <title>CodeCrafters: Constraints — Internal Explainer</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-color: #090a0c;
+      --bg-surface: #0f1115;
+      --border-color: #1e2128;
+      --border-hover: #2dd4bf33;
+      --text-primary: #e8eaed;
+      --text-muted: #8c939e;
+      --accent-color: #2dd4bf;
+      --accent-dim: rgba(45, 212, 191, 0.1);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      --max-width: 720px;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.75;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Page Layout Architecture */
+    .page-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    /* Header Block */
+    .doc-header {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      background-color: var(--accent-dim);
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    .doc-header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Lede Quote */
+    .summary-quote {
+      border-left: 2px solid var(--accent-color);
+      padding: 1rem 0 1rem 1.5rem;
+      background-color: var(--bg-surface);
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+      margin-top: 1.5rem;
+    }
+
+    .summary-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    .summary-quote p {
+      font-size: 1.1rem;
+      color: #ffffff;
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    /* Sticky Sidebar Navigation */
+    .sidebar-rail {
+      position: sticky;
+      top: 2rem;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding-right: 1rem;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .toc-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .toc-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s ease;
+      display: block;
+      line-height: 1.3;
+    }
+
+    .toc-link:hover {
+      color: var(--accent-color);
+    }
+
+    /* Mobile TOC Dropdown (details/summary) */
+    .mobile-toc-container {
+      display: none;
+      margin-bottom: 2rem;
+    }
+
+    .mobile-toc-details {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+    }
+
+    .mobile-toc-summary {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--accent-color);
+      cursor: pointer;
+      list-style: none;
+      outline: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mobile-toc-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .mobile-toc-list {
+      list-style-type: none;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Content Area */
+    .content-area {
+      max-width: var(--max-width);
+    }
+
+    section {
+      scroll-margin-top: 2rem;
+      margin-bottom: 5.5rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem 0;
+    }
+
+    p {
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+    }
+
+    p.muted {
+      color: var(--text-muted);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent-color);
+      background-color: rgba(45, 212, 191, 0.05);
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+    }
+
+    ul, ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin: 1.75rem 0;
+    }
+
+    .comp-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+
+    .comp-card.highlight {
+      border-color: var(--border-hover);
+      box-shadow: 0 0 15px rgba(45, 212, 191, 0.02);
+    }
+
+    .comp-title {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .comp-card.highlight .comp-title {
+      color: var(--accent-color);
+    }
+
+    .comp-subtitle {
+      font-size: 1.15rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .comp-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      line-height: 1.5;
+    }
+
+    /* Anatomy Cards */
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .anatomy-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .anatomy-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.75rem;
+    }
+
+    .anatomy-num {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-color);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .anatomy-title {
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .anatomy-card p {
+      font-size: 0.9375rem;
+      margin-bottom: 1rem;
+    }
+
+    .anatomy-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Callout labels and boxes */
+    .callout-box {
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin: 1.75rem 0;
+    }
+
+    .callout-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    /* Large Leverage text */
+    .leverage-value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+      margin: 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+    
+    .leverage-desc {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    /* Cost estimation highlighted box */
+    .cost-box {
+      background-color: rgba(45, 212, 191, 0.02);
+      border: 1px dashed rgba(45, 212, 191, 0.25);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .cost-box p {
+      margin-bottom: 0;
+      font-size: 0.9375rem;
+    }
+
+    /* Code Block (Monospace conditions) */
+    .monospace-block {
+      background-color: #050608;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    .monospace-block .cond-line {
+      display: flex;
+      gap: 1.5rem;
+      white-space: pre;
+    }
+
+    .monospace-block .cond-check {
+      color: var(--accent-color);
+      flex-shrink: 0;
+    }
+
+    .monospace-block .cond-comment {
+      color: var(--text-muted);
+    }
+
+    /* Risk Blocks */
+    .risk-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 1.75rem;
+    }
+
+    .risk-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+
+    .risk-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .risk-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #ef4444;
+      background-color: rgba(239, 68, 68, 0.1);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .risk-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .risk-card p {
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .mitigation-line {
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .mitigation-prefix {
+      color: var(--accent-color);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .mitigation-text {
+      color: #d1d5db;
+    }
+
+    /* Terminal list */
+    .terminal-list {
+      background-color: #050608;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .terminal-list li {
+      color: #9ca3af;
+      margin-bottom: 0.35rem;
+    }
+
+    .terminal-list li::before {
+      content: "$ ";
+      color: var(--accent-color);
+    }
+
+    /* Infrastructure Split visual styling */
+    .infra-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .infra-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+
+    .infra-card-title {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: block;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .infra-card ul {
+      margin-bottom: 0;
+      padding-left: 1.25rem;
+    }
+
+    .infra-card li {
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .infra-card li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Spec list styling */
+    .spec-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+
+    .spec-list li {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: #ffffff;
+      margin-bottom: 0.6rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .spec-list li::before {
+      content: "✔";
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .spec-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 2.5rem;
+      margin-top: 6rem;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive breakpoints */
+    @media (max-width: 900px) {
+      .page-layout {
+        padding: 2.5rem 1.5rem;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .sidebar-rail {
+        display: none; /* Hide standard sticky rail */
+      }
+
+      .mobile-toc-container {
+        display: block; /* Show details/summary TOC dropdown */
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-layout {
+        padding: 1.5rem 1rem;
+      }
+
+      section {
+        margin-bottom: 4rem;
+      }
+
+      .doc-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .doc-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .summary-quote p {
+        font-size: 1rem;
+      }
+
+      .comparison-grid, .infra-split {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .monospace-block {
+        font-size: 0.75rem;
+        padding: 1rem;
+      }
+
+      .leverage-value {
+        font-size: 1.5rem;
+      }
+
+      .risk-card {
+        padding: 1.25rem;
+      }
+
+      .mitigation-line {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+
+    /* Shared Navigation */
+    .site-nav {
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .site-nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .site-nav-brand {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+
+    .site-nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s ease;
+      padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <span class="site-nav-brand">CodeCrafters: Constraints</span>
+      <div class="site-nav-links">
+        <a href="pitch.html" class="nav-link">Pitch</a>
+        <a href="explainer.html" class="nav-link active">Explainer</a>
+        <a href="monetise.html" class="nav-link">Monetisation</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-layout">
+
+    <!-- Header Block (Full Width) -->
+    <header class="doc-header">
+      <span class="doc-badge">INTERNAL PRODUCT EXPLAINER</span>
+      <h1>CodeCrafters: Constraints</h1>
+      <p class="doc-subtitle">Evaluative breakdown of challenge architecture, infrastructure, content pipeline, and maintenance cost.</p>
+      
+      <div class="summary-quote">
+        <span class="summary-label">Summary</span>
+        <p>Constraints is a new challenge format where users inherit a working but limited system and must make it survive a real production pressure — verified by an automated test runner, with everything running locally on their machine.</p>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation Rail (>= 900px screen) -->
+    <aside class="sidebar-rail">
+      <div class="sidebar-title">Sections</div>
+      <nav>
+        <ul class="toc-list">
+          <li><a href="#differences" class="toc-link">How it differs</a></li>
+          <li><a href="#anatomy" class="toc-link">Challenge anatomy</a></li>
+          <li><a href="#infrastructure" class="toc-link">Infrastructure model</a></li>
+          <li><a href="#pipeline" class="toc-link">Content pipeline</a></li>
+          <li><a href="#runner" class="toc-link">Test runner in detail</a></li>
+          <li><a href="#risks" class="toc-link">Risk areas</a></li>
+          <li><a href="#scope" class="toc-link">Suggested launch scope</a></li>
+          <li><a href="#why-build" class="toc-link">Why build this</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- Mobile TOC Dropdown (< 900px screen, details/summary collapsed) -->
+      <div class="mobile-toc-container">
+        <details class="mobile-toc-details">
+          <summary class="mobile-toc-summary">
+            <span>Jump to section</span>
+            <span>▼</span>
+          </summary>
+          <ul class="mobile-toc-list">
+            <li><a href="#differences" class="toc-link">How it differs</a></li>
+            <li><a href="#anatomy" class="toc-link">Challenge anatomy</a></li>
+            <li><a href="#infrastructure" class="toc-link">Infrastructure model</a></li>
+            <li><a href="#pipeline" class="toc-link">Content pipeline</a></li>
+            <li><a href="#runner" class="toc-link">Test runner in detail</a></li>
+            <li><a href="#risks" class="toc-link">Risk areas</a></li>
+            <li><a href="#scope" class="toc-link">Suggested launch scope</a></li>
+            <li><a href="#why-build" class="toc-link">Why build this</a></li>
+          </ul>
+        </details>
+      </div>
+
+      <!-- Section: How it differs -->
+      <section id="differences">
+        <h2>How it differs from existing challenges</h2>
+        <p>Existing CodeCrafters challenges focus on Greenfield implementation, checking protocol specifications. Constraints changes the axis entirely to Brownfield scaling, checking resilience under load.</p>
+        
+        <div class="comparison-grid">
+          <div class="comp-card">
+            <span class="comp-title">Existing Challenges</span>
+            <div class="comp-subtitle">Greenfield builds</div>
+            <p>You start from nothing and implement a system to spec. The test runner speaks a protocol (Redis/Git) and checks your outputs directly against it.</p>
+          </div>
+          <div class="comp-card highlight">
+            <span class="comp-title">Constraints Challenges</span>
+            <div class="comp-subtitle">Brownfield transformations</div>
+            <p>You start from a working system with a specific weakness. You fix it. The test runner applies real-time traffic pressure and checks overall outcomes — not implementation.</p>
+          </div>
+        </div>
+
+        <p>The educational model is identical: no hand-holding, objective pass/fail, and your own tools. The content model is different: instead of a spec to implement, there's a strict physical constraint to survive.</p>
+      </section>
+
+      <!-- Section: Challenge anatomy -->
+      <section id="anatomy">
+        <h2>Challenge anatomy</h2>
+        <p>Every Constraints challenge has four modular components designed to slot directly into the existing CodeCrafters ecosystem.</p>
+
+        <div class="anatomy-grid">
+          <!-- Component 1 -->
+          <div class="anatomy-card">
+            <span class="anatomy-num">01</span>
+            <h3 class="anatomy-title">The starter repo</h3>
+            <p>A working application, provided as a Git repository. It runs via <code>docker-compose up</code>. It has real code, real dependencies, real behaviour — not a toy. It is deliberately built with a specific weakness that the challenge will expose.</p>
+            <p>For the Twitter scaling example:</p>
+            <ul>
+              <li>Flask app, Postgres database, basic feed/post/follow endpoints.</li>
+              <li>~500 lines of application code, intentionally naive in specific places.</li>
+              <li>A <code>docker-compose.yml</code> that brings it up in under 30 seconds on any machine with Docker.</li>
+            </ul>
+          </div>
+
+          <!-- Component 2 -->
+          <div class="anatomy-card">
+            <span class="anatomy-num">02</span>
+            <h3 class="anatomy-title">The stages</h3>
+            <p>Each challenge is broken into 4–6 stages of increasing difficulty. Stages are sequential — you must pass stage N before unlocking stage N+1. Each stage isolates one scaling problem.</p>
+            <ul class="terminal-list">
+              <li>Stage 1: read path performance</li>
+              <li>Stage 2: write path async</li>
+              <li>Stage 3: fault tolerance</li>
+              <li>Stage 4: stateless services</li>
+              <li>Stage 5: traffic shaping</li>
+            </ul>
+            <p>Each stage has exactly one pass condition. The pass condition is objective and machine-verifiable.</p>
+          </div>
+
+          <!-- Component 3 -->
+          <div class="anatomy-card">
+            <span class="anatomy-num">03</span>
+            <h3 class="anatomy-title">The test runner</h3>
+            <p>The test runner is a small Go binary (consistent with CodeCrafters' existing runner architecture) that:</p>
+            <ul>
+              <li>Sends HTTP traffic at configurable concurrency and rate.</li>
+              <li>Injects failures (kills containers, introduces latency, drops connections).</li>
+              <li>Measures latency percentiles, error rates, data consistency.</li>
+              <li>Returns pass/fail with a specific, actionable failure reason.</li>
+            </ul>
+            <p>The test runner runs on CodeCrafters' servers. It connects to the user's locally-running system via a temporary tunnel. The runner never needs to execute the user's code — it only speaks HTTP to it.</p>
+          </div>
+
+          <!-- Component 4 -->
+          <div class="anatomy-card">
+            <span class="anatomy-num">04</span>
+            <h3 class="anatomy-title">The hints system</h3>
+            <p>Identical to existing challenges. Progressive hints unlocked on demand. No spoilers in the main flow.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Infrastructure model -->
+      <section id="infrastructure">
+        <h2>Infrastructure model</h2>
+        <span class="callout-label" style="color: var(--accent-color); margin-bottom: 0.5rem;">KEY SECTION</span>
+        <p>This is the most important section for evaluating overall build cost and computational requirements.</p>
+
+        <div class="infra-split">
+          <div class="infra-card">
+            <span class="infra-card-title">Runs on User's Machine</span>
+            <ul>
+              <li>The entire application stack (via Docker Compose)</li>
+              <li>All databases, queues, and caches the user introduces</li>
+              <li>All application code the user writes</li>
+            </ul>
+          </div>
+          <div class="infra-card">
+            <span class="infra-card-title">Runs on CC Servers</span>
+            <ul>
+              <li>The test runner binary (stateless, short-lived)</li>
+              <li>A lightweight tunnel endpoint to reach the local stack</li>
+              <li>The existing challenge platform (unchanged)</li>
+            </ul>
+          </div>
+        </div>
+
+        <p style="margin-top: 1.5rem;">The test runner is stateless and short-lived. It spins up, runs a test suite (typically 30–120 seconds of traffic), returns a result, and exits. There is no persistent infrastructure per user. No long-running VMs. No complex Kubernetes clusters.</p>
+        <p>The tunnel is the only novel infrastructure requirement. This is a solved problem — ngrok, Cloudflare Tunnel, or a self-hosted equivalent. Cost is negligible at CodeCrafters' scale.</p>
+
+        <div class="cost-box">
+          <p><strong>Estimated marginal infrastructure cost per challenge attempt:</strong> roughly equivalent to existing challenges. The user's machine absorbs the massive compute cost that would otherwise fall on CodeCrafters' servers.</p>
+        </div>
+      </section>
+
+      <!-- Section: Content pipeline -->
+      <section id="pipeline">
+        <h2>Content pipeline</h2>
+        
+        <h3>Writing a challenge</h3>
+        <ol>
+          <li><strong>A starter repo</strong> — ~1–2 weeks of engineering time to build a realistic but scoped application with deliberate weaknesses.</li>
+          <li><strong>A test runner configuration</strong> — defines traffic patterns, failure injections, and pass conditions per stage. Typically 1–3 days per challenge once the runner framework exists.</li>
+          <li><strong>Stage descriptions and hints</strong> — consistent with existing challenge content effort.</li>
+        </ol>
+
+        <p style="font-weight: 600;">Estimated total effort per challenge: 3–5 weeks for the first few, dropping as the runner framework matures and templates emerge.</p>
+
+        <h3>Language support</h3>
+        <p>Unlike existing challenges where every language needs a separate starter repo (you implement Redis in Rust vs Go vs Python), Constraints challenges are language-agnostic. The starter repo is the same regardless of what language the user uses to solve it. A user can introduce a Redis cache written in any language they want — the test runner only speaks HTTP.</p>
+
+        <div class="callout-box">
+          <span class="callout-label">Leverage</span>
+          <div class="leverage-value">1 challenge = every language</div>
+          <p class="leverage-desc">One single starter repo serves all software developers, regardless of their language preference. This provides a significant content leverage point compared to existing paths.</p>
+        </div>
+
+        <h3>Maintenance burden</h3>
+        <p>Starter repos have real dependencies (Flask, Postgres, etc.) that require occasional updates. This is the primary ongoing maintenance cost. We estimate this to be low. Docker pins versions; the challenge doesn't need to track upstream unless a security issue forces it.</p>
+      </section>
+
+      <!-- Section: Test runner in detail -->
+      <section id="runner">
+        <h2>The test runner in detail</h2>
+        
+        <h3>Traffic injection</h3>
+        <p>The runner sends HTTP requests using a configurable profile:</p>
+        <ul>
+          <li><strong>Concurrency</strong> — e.g. 500 simultaneous connections.</li>
+          <li><strong>Request mix</strong> — e.g. 80% reads, 20% writes.</li>
+          <li><strong>Duration</strong> — e.g. 60 seconds sustained.</li>
+          <li><strong>Ramp profile</strong> — e.g. linear ramp from 0 to 500 over 10 seconds.</li>
+        </ul>
+
+        <h3>Failure injection</h3>
+        <p>The runner can execute the following failure modes:</p>
+        <ul>
+          <li>Kill a specific Docker container by name (via Docker API or <code>docker kill</code> over SSH).</li>
+          <li>Introduce artificial latency on a specific port (via <code>tc netem</code> on the user's machine — requires a small privileged helper, or approximated by the runner holding connections).</li>
+          <li>Send malformed or adversarial requests.</li>
+        </ul>
+
+        <h3>Pass conditions</h3>
+        <p>Each stage defines one or more measurable outcomes, strictly enforced:</p>
+
+        <div class="monospace-block">
+          <div class="cond-line"><span class="cond-check">✔</span> p99_latency_ms < 200     <span class="cond-comment">— measured over the traffic window</span></div>
+          <div class="cond-line"><span class="cond-check">✔</span> error_rate < 0.001       <span class="cond-comment">— HTTP 5xx rate during failure injection window</span></div>
+          <div class="cond-line"><span class="cond-check">✔</span> data_consistent: true    <span class="cond-comment">— spot-check reads after writes under concurrency</span></div>
+          <div class="cond-line"><span class="cond-check">✔</span> cross_instance_read: true <span class="cond-comment">— upload to instance A, read from instance B</span></div>
+        </div>
+
+        <p>All pass conditions are deterministic given a correct solution. There is no partial credit.</p>
+      </section>
+
+      <!-- Section: Risk areas -->
+      <section id="risks">
+        <h2>Risk areas</h2>
+        
+        <div class="risk-list">
+          <!-- Risk 1 -->
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-tag">RISK 1</span>
+              <span class="risk-title">Flakiness</span>
+            </div>
+            <p>The biggest risk in this format is non-deterministic test results — a correct solution that occasionally fails due to timing, network variance on the user's machine, or Docker overhead.</p>
+            <div class="mitigation-line">
+              <span class="mitigation-prefix">→ Mitigation:</span>
+              <span class="mitigation-text">Generous thresholds calibrated against multiple reference implementations on different hardware. Stage pass conditions should be easily achievable on a 4-core laptop, not require a workstation.</span>
+            </div>
+          </div>
+
+          <!-- Risk 2 -->
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-tag">RISK 2</span>
+              <span class="risk-title">Challenge difficulty calibration</span>
+            </div>
+            <p>Unlike protocol implementation challenges where correct is binary, performance challenges have a continuous output. Setting the right threshold (200ms, not 50ms, not 2000ms) requires testing against multiple naive and correct implementations.</p>
+            <div class="mitigation-line">
+              <span class="mitigation-prefix">→ Mitigation:</span>
+              <span class="mitigation-text">Internal testing with a range of solutions before launch. Adjust thresholds dynamically based on cohort data post-launch.</span>
+            </div>
+          </div>
+
+          <!-- Risk 3 -->
+          <div class="risk-card">
+            <div class="risk-header">
+              <span class="risk-tag">RISK 3</span>
+              <span class="risk-title">Scope creep in starter repos</span>
+            </div>
+            <p>A realistic Twitter clone could become very large. The challenge is scoping it to be interesting but completable in a few hours.</p>
+            <div class="mitigation-line">
+              <span class="mitigation-prefix">→ Mitigation:</span>
+              <span class="mitigation-text">Strict content guidelines. The starter repo should have exactly the weaknesses the challenge tests — nothing more. Resist realism for its own sake.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Suggested launch scope -->
+      <section id="scope">
+        <h2>Suggested launch scope</h2>
+        <p>One challenge to start. The Twitter scaling example is the right first one — it is well-understood, the stages are clearly separable, and it maps directly onto skills that real engineers recognise from their work.</p>
+        
+        <div class="callout-box">
+          <span class="callout-label">Launch Spec</span>
+          <ul class="spec-list">
+            <li>Five progressive stages</li>
+            <li>One language-agnostic starter repo</li>
+            <li>Go test runner</li>
+            <li>No tunnel complexity at launch (exposing a local port manually)</li>
+          </ul>
+        </div>
+
+        <p>Validate that the format works, that the test runner is stable, and that users find the difficulty calibration right. Then build the second challenge.</p>
+      </section>
+
+      <!-- Section: Why this is worth building -->
+      <section id="why-build">
+        <h2>Why this is worth building</h2>
+        <p>System design is the skill gap that determines senior-to-staff promotion more than anything else. No existing platform makes it testable. CodeCrafters' test runner model is the only approach that could make it objective.</p>
+        <p>The content leverage is unusually high — one challenge works for every language simultaneously. The infrastructure cost is lower than existing challenges because the user's machine does the heavy lifting. And the ROI for users is immediately legible: this is exactly what staff interviews test.</p>
+        <p>It is the most natural extension of what CodeCrafters already does.</p>
+      </section>
+
+    </main>
+
+    <!-- Footer Block (Full Width) -->
+    <footer>
+      <p>A product concept proposed by Kashish Patel &bull; CodeCrafters Pitch Team</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

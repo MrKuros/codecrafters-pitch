@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeCrafters: Constraints — Monetisation</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-color: #090a0c;
+      --bg-surface: #0f1115;
+      --border-color: #1e2128;
+      --border-hover: #2dd4bf33;
+      --text-primary: #e8eaed;
+      --text-muted: #8c939e;
+      --accent-color: #2dd4bf;
+      --accent-dim: rgba(45, 212, 191, 0.1);
+      --fail-color: #f87171;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      --max-width: 720px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.75;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    section {
+      margin-bottom: 5.5rem;
+    }
+
+    h1, h2, h3, h4 {
+      color: #ffffff;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+    }
+
+    p.muted {
+      color: var(--text-muted);
+    }
+
+    /* Header Block */
+    .doc-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 2.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      background-color: var(--accent-dim);
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    .doc-header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .doc-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .summary-quote {
+      border-left: 2px solid var(--accent-color);
+      padding: 1rem 0 1rem 1.5rem;
+      background-color: var(--bg-surface);
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+      margin-top: 1.5rem;
+    }
+
+    .summary-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    .summary-quote p {
+      font-size: 1.1rem;
+      color: #ffffff;
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    .attribution {
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      display: block;
+    }
+
+    /* §1 Streams Grid */
+    .stream-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .stream-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .stream-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .stream-card.highlight {
+      border-color: var(--border-hover);
+      box-shadow: 0 0 15px rgba(45, 212, 191, 0.02);
+    }
+
+    .stream-label {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .stream-title {
+      font-size: 1.15rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .stream-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .price-signal {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+      margin-top: auto;
+    }
+    
+    .stream-prose {
+      font-size: 1.05rem;
+      text-align: center;
+      color: var(--text-primary);
+      margin-top: 1.5rem;
+      font-style: italic;
+    }
+
+    /* §3 Steps */
+    .steps-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .steps-row {
+        flex-direction: row;
+      }
+    }
+
+    .step-card {
+      flex: 1;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+
+    .step-number {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent-color);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .step-title {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .step-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      line-height: 1.5;
+    }
+
+    /* §3 Report Card */
+    .report-card-wrapper {
+      margin-top: 2rem;
+    }
+
+    .report-card-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .report-card {
+      background-color: #050608;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+
+    .report-line {
+      white-space: pre;
+      display: flex;
+      margin-bottom: 0.25rem;
+    }
+
+    .report-line.empty {
+      height: 1.5rem;
+    }
+
+    .report-pass {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    .report-fail {
+      color: var(--fail-color);
+      font-weight: 600;
+    }
+
+    .report-signal {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #ffffff;
+      margin-top: 1rem;
+      white-space: pre;
+    }
+
+    /* Shared Navigation */
+    .site-nav {
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .site-nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .site-nav-brand {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+
+    .site-nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s ease;
+      padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+    }
+
+    /* §5 Funnel */
+    .funnel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .funnel-tier {
+      background-color: var(--bg-surface);
+      border-radius: 4px;
+      padding: 0.875rem 1.25rem;
+      width: 100%;
+    }
+
+    .funnel-tier.t1 { border-left: 2px solid rgba(45,212,191,0.3); }
+    .funnel-tier.t2 { border-left: 2px solid rgba(45,212,191,0.65); }
+    .funnel-tier.t3 { border-left: 2px solid rgba(45,212,191,1.0); }
+
+    @media (min-width: 640px) {
+      .funnel-tier.t2 { width: 80%; }
+      .funnel-tier.t3 { width: 60%; }
+    }
+
+    /* §6 Pricing Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .pricing-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .pricing-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1.75rem;
+    }
+
+    .pricing-title {
+      font-size: 1.15rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .price-amount {
+      font-family: var(--font-mono);
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      margin-bottom: 0.25rem;
+    }
+
+    .price-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .pricing-card ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+
+    .pricing-card li {
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      margin-bottom: 0.6rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .pricing-card li::before {
+      content: "✔";
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+
+    .pricing-card li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* §7 ROI List */
+    .roi-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .roi-statement {
+      font-family: var(--font-sans);
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.5;
+      padding-left: 1.25rem;
+      border-left: 3px solid var(--border-color);
+      transition: border-color 0.2s ease;
+    }
+
+    .roi-statement:hover {
+      border-left-color: var(--accent-color);
+    }
+
+    .roi-statement strong {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 2.5rem;
+      margin-top: 6rem;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <span class="site-nav-brand">CodeCrafters: Constraints</span>
+      <div class="site-nav-links">
+        <a href="pitch.html" class="nav-link">Pitch</a>
+        <a href="explainer.html" class="nav-link">Explainer</a>
+        <a href="monetise.html" class="nav-link active">Monetisation</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header class="doc-header">
+      <span class="doc-badge">MONETISATION STRATEGY</span>
+      <h1>CodeCrafters: Constraints</h1>
+      <p class="doc-subtitle">Two Revenue Streams. One Infrastructure Investment.</p>
+      
+      <div class="summary-quote">
+        <span class="summary-label">LEDE</span>
+        <p>"Nobody has standardised system design interviews the way HackerRank standardised algorithms. Constraints can be that product."</p>
+        <span class="attribution">— Kashish Patel, product proposal</span>
+      </div>
+    </header>
+
+    <section id="streams">
+      <h2>The two revenue streams</h2>
+      <div class="stream-grid">
+        <div class="stream-card">
+          <span class="stream-label">STREAM 01</span>
+          <div class="stream-title">Individual Subscriptions</div>
+          <div class="stream-body">Engineers pay monthly to do challenges and improve. Same model as existing CodeCrafters challenges. Bottom of the funnel — this is where engineers discover Constraints.</div>
+          <div class="price-signal">~$40/month per engineer</div>
+        </div>
+        <div class="stream-card highlight">
+          <span class="stream-label">STREAM 02</span>
+          <div class="stream-title">Company Assessments</div>
+          <div class="stream-body">Companies pay to use Constraints as a hiring tool. Candidates complete a challenge, the test runner grades it, the company gets a structured report. No whiteboard. No subjectivity.</div>
+          <div class="price-signal">per seat or per assessment — enterprise pricing</div>
+        </div>
+      </div>
+      <p class="stream-prose">Same content. Same infrastructure. Two revenue streams.</p>
+    </section>
+
+    <section id="broken">
+      <h2>Why system design interviews are broken</h2>
+      <p>Current system design interviews produce noisy signal. The score is heavily correlated with how well a candidate <em>talks</em> about architecture — not whether they can produce it. A candidate who has read the right books can sound like a staff engineer. A candidate who has actually scaled production systems but communicates differently fails.</p>
+      <p>The whiteboard has no test runner. There is no ground truth. Two interviewers in the same session frequently disagree on the same candidate. Companies know this is broken. They have no alternative.</p>
+    </section>
+
+    <section id="b2b-product">
+      <h2>What the B2B product looks like</h2>
+      <div class="steps-row">
+        <div class="step-card">
+          <span class="step-number">Step 01</span>
+          <div class="step-title">Send</div>
+          <p>Company sends candidate a challenge link. Senior, staff, or principal tier.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">Step 02</span>
+          <div class="step-title">Build</div>
+          <p>Candidate works locally for 2–3 hours. Their own machine, their own tools.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">Step 03</span>
+          <div class="step-title">Push</div>
+          <p>Candidate pushes when done. Test runner grades it automatically.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">Step 04</span>
+          <div class="step-title">Report</div>
+          <p>Company receives structured report: stages passed, latency numbers, solutions.</p>
+        </div>
+      </div>
+
+      <div class="report-card-wrapper">
+        <span class="report-card-label">SAMPLE REPORT</span>
+        <div class="report-card">
+          <div class="report-line">Candidate Assessment Report</div>
+          <div class="report-line">Challenge: Scale Twitter — Senior Track</div>
+          <div class="report-line">Duration: 2h 14m</div>
+          <div class="report-line empty"></div>
+          <div class="report-line">Stage 1 — Feed Performance     <span class="report-pass">PASS</span>   p99: 87ms</div>
+          <div class="report-line">Stage 2 — Async Fanout         <span class="report-pass">PASS</span>   queue: Redis, worker: correct</div>
+          <div class="report-line">Stage 3 — Fault Tolerance      <span class="report-pass">PASS</span>   graceful degradation verified</div>
+          <div class="report-line">Stage 4 — Stateless Services   <span class="report-pass">PASS</span>   cross-instance reads: ok</div>
+          <div class="report-line">Stage 5 — Rate Limiting        <span class="report-fail">FAIL</span>   bot traffic not throttled</div>
+          <div class="report-line empty"></div>
+          <div class="report-line">Overall: 4/5 stages passed</div>
+          <div class="report-line report-signal">Signal: Strong senior, not yet staff</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="moat">
+      <h2>Why nobody else can build this</h2>
+      <p><strong>HackerRank can't do this.</strong> HackerRank's entire infrastructure is browser-based sandboxed execution. It cannot run Docker Compose. It cannot inject real network failures. It cannot test actual distributed behaviour across containers. The browser sandbox produces toy signal. Constraints produces production signal.</p>
+      <p><strong>The local execution model is the moat.</strong> The fact that Constraints runs on the candidate's own machine — their terminal, their Docker, their tools — is what makes the signal real. It also makes it structurally impossible for a browser-based competitor to replicate without rebuilding their entire infrastructure.</p>
+      <p><strong>CodeCrafters already has the content.</strong> The challenges exist. The test runner model is proven. The B2B product is the same content licensed differently. The marginal cost of adding company assessments is low.</p>
+    </section>
+
+    <section id="funnel">
+      <h2>The funnel</h2>
+      <div class="funnel">
+        <div class="funnel-tier t1">Engineers do challenges individually</div>
+        <div class="funnel-tier t2">Companies discover Constraints through their engineers</div>
+        <div class="funnel-tier t3">Companies pay for assessment licenses</div>
+      </div>
+      <p class="muted">The individual product feeds the B2B pipeline at zero acquisition cost.</p>
+    </section>
+
+    <section id="pricing">
+      <h2>Pricing model</h2>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-title">Individual</div>
+          <div class="price-amount">$40/month</div>
+          <div class="price-label">per engineer</div>
+          <ul>
+            <li>Full challenge access</li>
+            <li>Same as existing CodeCrafters pricing</li>
+          </ul>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-title">Company</div>
+          <div class="price-amount">$500–2000</div>
+          <div class="price-label">assessment bundle (10 candidate slots)</div>
+          <ul>
+            <li>Custom challenge tier selection (senior / staff / principal)</li>
+            <li>Structured report per candidate</li>
+            <li>ATS integration (roadmap)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted">Enterprise volume pricing available. The B2B margin is significantly higher than individual subscriptions.</p>
+    </section>
+
+    <section id="roi">
+      <h2>Why this is worth building</h2>
+      <div class="roi-list">
+        <div class="roi-statement">The individual product <strong>already justifies</strong> building Constraints. The B2B product makes it a business line.</div>
+        <div class="roi-statement"><strong>No competitor can replicate</strong> the local execution model without rebuilding from scratch.</div>
+        <div class="roi-statement">The content is <strong>written once</strong>. The revenue streams are independent.</div>
+      </div>
+    </section>
+
+    <footer>
+      A product concept proposed by Kashish Patel
+    </footer>
+  </div>
+</body>
+</html>
